@@ -10,7 +10,7 @@
 int main(){
 
 	// set default log level to info, until reading config file
-	Logger logger("info");
+	Logger logger1("info");
 
 	// create a buffer to make log with it using ostringstream
 	std::ostringstream tmp;  
@@ -21,13 +21,13 @@ int main(){
 	try {
 
 		boost::asio::io_service io_service;
-		Server server(io_service, port, buffer_size, logger.getConfigType());
+		Server server(io_service, port, buffer_size, logger1.getConfigType());
 		io_service.run();
 	
     } catch (std::exception& e) {
 
   		tmp << "exception: " << e.what();
-	    logger.log(tmp.str(), "error");
+	    logger1.log(tmp.str(), "error");
 
 	}
 

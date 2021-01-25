@@ -1,4 +1,5 @@
 #include "../Logger/Logger.h"
+#include "Session.h"
 
 #include <string>
 #include <boost/asio.hpp>
@@ -12,17 +13,19 @@ class Server {
 
 public:
 
+	// constructor of server class
 	Server(boost::asio::io_service& io_service, short port, unsigned buffer_size, std::string logType);
 
 private:
 
+	//asynchronously accept new connections and create session
 	void do_accept();
 
 	tcp::acceptor acceptor_;
 	tcp::socket in_socket_;
 	size_t buffer_size_;
-	unsigned session_id_;
-	Logger logger;
+	unsigned session_id_0;
+	Logger logger2;
 };
 
 #endif
