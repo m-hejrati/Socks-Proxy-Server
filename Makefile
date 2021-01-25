@@ -9,7 +9,7 @@ $(TARGET): $(OBJECTS)
 Logger.o: Logger/Logger.cpp Logger/Logger.h
 	$(CXX) $(CXXFLAGS) "Logger/Logger.cpp" -I "spdlog/include"
 Server.o: Proxy/Server.cpp Proxy/Server.h
-	$(CXX) $(CXXFLAGS) "Proxy/Server.cpp" -lboost_system -lboost_thread -lpthread
+	$(CXX) $(CXXFLAGS) "Proxy/Server.cpp" -lboost_system -lboost_thread -lpthread  -I "spdlog/include"
 main.o: main.cpp
 	$(CXX) $(CXXFLAGS) main.cpp -lboost_system -lboost_thread -lpthread -I "spdlog/include"
 

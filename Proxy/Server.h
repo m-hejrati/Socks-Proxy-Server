@@ -1,3 +1,5 @@
+#include "../Logger/Logger.h"
+
 #include <string>
 #include <boost/asio.hpp>
 
@@ -10,7 +12,7 @@ class Server {
 
 public:
 
-	Server(boost::asio::io_service& io_service, short port, unsigned buffer_size);
+	Server(boost::asio::io_service& io_service, short port, unsigned buffer_size, std::string logType);
 
 private:
 
@@ -20,6 +22,7 @@ private:
 	tcp::socket in_socket_;
 	size_t buffer_size_;
 	unsigned session_id_;
+	Logger logger;
 };
 
 #endif

@@ -21,7 +21,7 @@ int main(){
 	try {
 
 		boost::asio::io_service io_service;
-		Server server(io_service, port, buffer_size);
+		Server server(io_service, port, buffer_size, logger.getConfigType());
 		io_service.run();
 	
     } catch (std::exception& e) {
