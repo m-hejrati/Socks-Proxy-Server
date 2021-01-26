@@ -15,8 +15,13 @@ Session::Session(tcp::socket in_socket, unsigned session_id, size_t buffer_size,
 
         logger3.setConfigType(logType);
 
-		// read handshake
-		read_socks5_handshake();
+}
+
+
+// this function should be seprated from constructor
+void Session::start(){
+
+	read_socks5_handshake();
 }
 
 
@@ -201,11 +206,10 @@ void Session::do_connect(tcp::resolver::iterator& it){
 				logger3.log(tmp.str(), "error");
 			}
 		});
-
 }
 
 
-// after connection stablish, proxy sends a response to client to show that it was successful
+// after connection establish, proxy sends a response to client to show that it was successful
 void Session::write_socks5_response(){
 	
 	auto self(shared_from_this());
@@ -226,13 +230,124 @@ void Session::write_socks5_response(){
 		[this, self](boost::system::error_code ec, std::size_t length){
 			
 			if (!ec){
-				// start communication ...
-			
+				// start communication.
+				// reading messages from both cilent and server sides
+				do_read(3);
+
 			}else{
 				std::ostringstream tmp; 
 				tmp << session_id_ << ": SOCKS5 response write " << remote_host_ << ":" << remote_port_ << ec.message();
+				logger3.log(tmp.str(), "error");
 			}
 		});
+}
+
+
+// this function get messages;
+// direction 1: from client to in_socket and store in in_buf
+// direction 2: from server to out_socket and store in out_buf
+void Session::do_read(int direction){
+	
+	auto self(shared_from_this());
+
+	// read from client
+	if (direction & 0x1)
+		in_socket_.async_receive(boost::asio::buffer(in_buf_),
+			[this, self](boost::system::error_code ec, std::size_t length){
+				
+				if (!ec){
+					
+					std::ostringstream tmp; 
+					tmp << session_id_ << ": --> " << std::to_string(length) << " bytes";
+					logger3.log(tmp.str(), "info");
+
+					do_write(1, length);
+				
+				}else{ //if (ec != boost::asio::error::eof)
+				
+					std::ostringstream tmp; 
+					tmp << session_id_ << ": closing session. Client socket read error ", ec.message();
+					logger3.log(tmp.str(), "warn");
+					// Most probably client closed socket. Let's close both sockets and exit session.
+					in_socket_.close();
+					out_socket_.close();
+				}
+
+			});
+
+	// read from server
+	if (direction & 0x2)
+		out_socket_.async_receive(boost::asio::buffer(out_buf_),
+			[this, self](boost::system::error_code ec, std::size_t length){
+			
+				if (!ec){
+				
+					std::ostringstream tmp; 
+					tmp << session_id_ << ": <-- " << std::to_string(length) << " bytes";
+					logger3.log(tmp.str(), "info");
+
+					do_write(2, length);
+				
+				}else{ //if (ec != boost::asio::error::eof)
+
+					std::ostringstream tmp; 
+					tmp << session_id_ << ": closing session. Remote socket read error ", ec.message();
+					logger3.log(tmp.str(), "warn");
+					// Most probably remote server closed socket. Let's close both sockets and exit session.
+					in_socket_.close();
+					out_socket_.close();
+				}
+			});
+}
+
+
+// this function send messages;
+// direction 1: send in_buf message from out_socket to server 
+// direction 2: from out_buf message in_socket to client
+void Session::do_write(int direction, std::size_t Length){
+
+	auto self(shared_from_this());
+
+	switch (direction){
+	
+		// send to server
+		case 1:
+			boost::asio::async_write(out_socket_, boost::asio::buffer(in_buf_, Length),
+				[this, self, direction](boost::system::error_code ec, std::size_t length){
+				
+					if (!ec)
+						do_read(direction);
+					
+					else{
+						std::ostringstream tmp; 
+						tmp << session_id_ << ": closing session. Client socket write error ", ec.message();
+						logger3.log(tmp.str(), "warn");
+						// Most probably client closed socket. Let's close both sockets and exit session.
+						in_socket_.close();
+						out_socket_.close();
+					}
+				});
+			break;
+			
+		// send to client
+		case 2:
+			boost::asio::async_write(in_socket_, boost::asio::buffer(out_buf_, Length),
+				[this, self, direction](boost::system::error_code ec, std::size_t length){
+				
+					if (!ec)
+						do_read(direction);
+					
+					else{
+						std::ostringstream tmp; 
+						tmp << session_id_ << ": closing session. Remote socket write error ", ec.message();
+						logger3.log(tmp.str(), "warn");
+						// Most probably remote server closed socket. Let's close both sockets and exit session.
+						in_socket_.close();
+						out_socket_.close();
+					}
+				});
+			break;
+	}
 }
 
 

@@ -13,8 +13,11 @@ class Session : public std::enable_shared_from_this<Session> {
 
 public:
 
-// constructor of session class
+	// constructor of session class
     Session(tcp::socket in_socket, unsigned session_id, size_t buffer_size, std::string logType);
+
+	void start();
+
 
 private:
 
@@ -40,15 +43,24 @@ private:
 	// after connection stablish, proxy sends a response to client to show that it was successful
 	void write_socks5_response();
 
+	// this function get messages;
+	// direction 1: from client with in_socket
+	// direction 2: from server with out_socket
+	void do_read(int direction);
 
-	tcp::socket in_socket_;
-	tcp::socket out_socket_;
+	// this function send messages;
+	// direction 1: send in_buf message from out_socket to server 
+	// direction 2: from out_buf message in_socket to client
+	void do_write(int direction, std::size_t Length);
+
+
+	tcp::socket in_socket_; // a socket in client side
+	tcp::socket out_socket_; // a socket in server side
 	tcp::resolver resolver;
-
 	std::string remote_host_;
 	std::string remote_port_;
-	std::vector<char> in_buf_;
-	std::vector<char> out_buf_;
+	std::vector<char> in_buf_; // a buffer to store client messages
+	std::vector<char> out_buf_; // a buffer to store server messages
 	int session_id_;
     Logger logger3;
 

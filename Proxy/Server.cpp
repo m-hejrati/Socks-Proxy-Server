@@ -26,7 +26,7 @@ void Server::do_accept(){
         if (!ec){
             
             // create new session and start handshakes...
-            std::make_shared<Session>(std::move(in_socket_), session_id_0++, buffer_size_, logger2.getConfigType());
+            std::make_shared<Session>(std::move(in_socket_), session_id_0 ++, buffer_size_, logger2.getConfigType())->start();
 
         } else{
 
