@@ -1,6 +1,7 @@
 #include "Session.h"
 
 #include <boost/asio.hpp>
+#include <inttypes.h>
 
 using boost::asio::ip::tcp;
 
@@ -18,7 +19,7 @@ Session::Session(tcp::socket in_socket, unsigned session_id, size_t buffer_size,
 }
 
 
-// this function should be seprated from constructor
+// this function should be separated from constructor
 void Session::start(){
 
 	read_socks5_handshake();
@@ -34,10 +35,10 @@ void Session::read_socks5_handshake()
 	// proxy receive version identifier/method selection message and store it in in_buf_
 	in_socket_.async_receive(boost::asio::buffer(in_buf_),
 		[this, self](boost::system::error_code ec, std::size_t length) {
-			
+
 			if (!ec){
 
-					// it has at least 3 byte and the first byte is socks version, second byte is number of methods.
+				// it has at least 3 byte and the first byte is socks version, second byte is number of methods.
 				if (length < 3 || in_buf_[0] != 0x05){
 
 					std::ostringstream tmp;  
@@ -77,7 +78,7 @@ void Session::write_socks5_handshake(){
 
 	boost::asio::async_write(in_socket_, boost::asio::buffer(in_buf_, 2), // Always 2-byte according to RFC1928
 		[this, self](boost::system::error_code ec, std::size_t length){
-			
+
 			if (!ec){
 				
 				if (in_buf_[1] == 0xFF)
@@ -151,7 +152,7 @@ void Session::read_socks5_request(){
 				}
 
 				do_resolve();
-			
+
 			}else{
 				
 				std::ostringstream tmp;  
@@ -173,7 +174,11 @@ void Session::do_resolve(){
 			
 			if (!ec){
 				
-				do_connect(it);
+				// filter ... (it should be optimized)
+				if (configReader.checkFilter(remote_host_, remote_port_))
+					cout << "Filtered address ...\n";
+				else
+					do_connect(it);
 			
 			}else{
 			
@@ -228,7 +233,7 @@ void Session::write_socks5_response(){
 
 	boost::asio::async_write(in_socket_, boost::asio::buffer(in_buf_, 10), // Always 10-byte according to RFC1928
 		[this, self](boost::system::error_code ec, std::size_t length){
-			
+
 			if (!ec){
 				// start communication.
 				// reading messages from both cilent and server sides
@@ -361,3 +366,4 @@ std::vector<char> in_buf_;
 std::vector<char> out_buf_;
 int session_id_;
 Logger logger3;
+ConfigReader configReader;

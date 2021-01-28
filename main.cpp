@@ -15,8 +15,8 @@ int main(){
 	// create a buffer to make log with it using ostringstream
 	std::ostringstream tmp;  
 
-    int port = 1080;
-    size_t buffer_size = 8192;
+	int port = 1080;
+	size_t buffer_size = 8192;
 
 	try {
 
@@ -24,10 +24,10 @@ int main(){
 		Server server(io_service, port, buffer_size, logger1.getConfigType());
 		io_service.run();
 	
-    } catch (std::exception& e) {
+	} catch (std::exception& e) {
 
-  		tmp << "exception: " << e.what();
-	    logger1.log(tmp.str(), "error");
+		tmp << "exception: " << e.what();
+		logger1.log(tmp.str(), "error");
 
 	}
 

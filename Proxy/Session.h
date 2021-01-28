@@ -1,4 +1,5 @@
 #include "../Logger/Logger.h"
+#include "../Input/ConfigReader.h"
 
 #include <boost/asio.hpp>
 #include <iostream>
@@ -63,6 +64,7 @@ private:
 	std::vector<char> out_buf_; // a buffer to store server messages
 	int session_id_;
     Logger logger3;
+	ConfigReader configReader;
 
 };
 
