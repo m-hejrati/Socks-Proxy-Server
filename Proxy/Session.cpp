@@ -6,13 +6,14 @@
 using boost::asio::ip::tcp;
 
 // constructor of session class
-Session::Session(tcp::socket in_socket, unsigned session_id, size_t buffer_size, std::string logType) :
+Session::Session(tcp::socket in_socket, unsigned session_id, size_t buffer_size, std::string logType, ConfigReader configReader_):
     in_socket_(std::move(in_socket)), 
     out_socket_(in_socket.get_io_service()), 
     resolver(in_socket.get_io_service()),
     in_buf_(buffer_size), 
     out_buf_(buffer_size), 
-    session_id_(session_id) {
+    session_id_(session_id),
+	configReader (configReader_) {
 
         logger3.setConfigType(logType);
 
@@ -174,9 +175,9 @@ void Session::do_resolve(){
 			
 			if (!ec){
 				
-				// filter ... (it should be optimized)
+				// filter
 				if (configReader.checkFilter(remote_host_, remote_port_))
-					cout << "Filtered address ...\n";
+					logger3.log("Filtered address ...\n", "warn");
 				else
 					do_connect(it);
 			

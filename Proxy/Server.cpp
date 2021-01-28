@@ -14,19 +14,23 @@ Server::Server(boost::asio::io_service& io_service, short port, unsigned buffer_
 
         logger2.setConfigType(logType);
 
+        // read config file just once and use it in every session 
+        ConfigReader configReader;
+        configReader.readConf("config.json");
+
         //accept new connections
-        do_accept();
+        do_accept(configReader);
 }
 
 //asynchronously accept new connections and create session
-void Server::do_accept(){
+void Server::do_accept(ConfigReader configReader){
 
-    acceptor_.async_accept(in_socket_, [this](boost::system::error_code ec){
+    acceptor_.async_accept(in_socket_, [this, configReader](boost::system::error_code ec){
 
-        if (!ec){
-            
+        if (!ec){     
+
             // create new session and start handshakes...
-            std::make_shared<Session>(std::move(in_socket_), session_id_0 ++, buffer_size_, logger2.getConfigType())->start();
+            std::make_shared<Session>(std::move(in_socket_), session_id_0 ++, buffer_size_, logger2.getConfigType(), configReader)->start();
 
         } else{
 
@@ -35,7 +39,7 @@ void Server::do_accept(){
             logger2.log(tmp.str(), "error");
         }
 
-        do_accept();
+        do_accept(configReader);
     });
 }
 

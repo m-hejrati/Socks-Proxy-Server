@@ -1,4 +1,5 @@
 #include "../Logger/Logger.h"
+#include "../Input/ConfigReader.h"
 #include "Session.h"
 
 #include <string>
@@ -19,7 +20,7 @@ public:
 private:
 
 	//asynchronously accept new connections and create session
-	void do_accept();
+	void do_accept(ConfigReader configReader);
 
 	tcp::acceptor acceptor_;
 	tcp::socket in_socket_;

@@ -8,13 +8,13 @@ std::vector<std::string> filPorts;
 
 
 // read config file and store filter ip and port
-void ConfigReader::readConf(){
+void ConfigReader::readConf(std::string address){
 
     // Create a root
     boost::property_tree::ptree root;
 
     // Load the json file in this ptree
-    boost::property_tree::read_json("config.json", root);
+    boost::property_tree::read_json(address, root);
 
     for (boost::property_tree::ptree::value_type &ip : root.get_child("filteredIP")){
 
@@ -32,8 +32,6 @@ void ConfigReader::readConf(){
 
 // check ip and port constraint
 bool ConfigReader::checkFilter(std::string remote_host_, std::string remote_port_){
-
-    readConf();
 
     for (std::string& ip : filIps)
         if (ip.compare(remote_host_))

@@ -17,7 +17,7 @@ private:
 public:
 
     // read config file and store filter ip and port
-    void readConf();
+    void readConf(std::string address);
 
     // check ip and port constraint
     bool checkFilter(std::string remote_host_, std::string remote_port_);

@@ -15,7 +15,7 @@ class Session : public std::enable_shared_from_this<Session> {
 public:
 
 	// constructor of session class
-    Session(tcp::socket in_socket, unsigned session_id, size_t buffer_size, std::string logType);
+    Session(tcp::socket in_socket, unsigned session_id, size_t buffer_size, std::string logType, ConfigReader configReader_);
 
 	void start();
 
