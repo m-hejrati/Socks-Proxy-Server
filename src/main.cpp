@@ -1,6 +1,5 @@
-// include dependent class
-#include "../include/Server.h"
-#include "../include/Logger.h"
+#include "Server.h"
+#include "Logger.h"
 
 #include <iostream> 
 #include <boost/asio.hpp>

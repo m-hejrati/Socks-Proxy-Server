@@ -1,4 +1,4 @@
-#include "../include/Server.h"
+#include "Server.h"
 
 #include <iostream>
 #include <boost/asio.hpp>
@@ -16,7 +16,7 @@ Server::Server(boost::asio::io_service& io_service, short port, unsigned buffer_
 
         // read config file just once and use it in every session 
         ConfigReader configReader;
-        configReader.readConf("config.json");
+        configReader.readConf("../config.json");
 
         //accept new connections
         do_accept(configReader);

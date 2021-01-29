@@ -1,4 +1,4 @@
-#include "../include/Logger.h"
+#include "Logger.h"
 
 #include "spdlog/spdlog.h"
 #include <string>
