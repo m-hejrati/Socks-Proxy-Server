@@ -34,11 +34,11 @@ void ConfigReader::readConf(std::string address){
 bool ConfigReader::checkFilter(std::string remote_host_, std::string remote_port_){
 
     for (std::string& ip : filIps)
-        if (ip.compare(remote_host_))
+        if (ip.compare(remote_host_) == 0)
             return 1;
 
     for (std::string& port : filPorts)
-        if (port.compare(remote_port_))
+        if (port.compare(remote_port_) == 0)
             return 1;
 
     return 0;
