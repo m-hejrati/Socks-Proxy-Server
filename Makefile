@@ -6,14 +6,14 @@ TARGET = main
 
 $(TARGET): $(OBJECTS)
 	$(CXX) $(LXXFLAGS) $(OBJECTS) -o $(TARGET) -lboost_system -lboost_thread -lpthread -I "spdlog/include"
-Logger.o: Logger/Logger.cpp Logger/Logger.h
-	$(CXX) $(CXXFLAGS) "Logger/Logger.cpp" -I "spdlog/include"
-ConfigReader.o: Input/ConfigReader.cpp Input/ConfigReader.h
-	$(CXX) $(CXXFLAGS) "Input/ConfigReader.cpp"
-Session.o: Proxy/Session.cpp Proxy/Session.h
-	$(CXX) $(CXXFLAGS) "Proxy/Session.cpp" -lboost_system -lboost_thread -lpthread  -I "spdlog/include"
-Server.o: Proxy/Server.cpp Proxy/Server.h
-	$(CXX) $(CXXFLAGS) "Proxy/Server.cpp" -lboost_system -lboost_thread -lpthread  -I "spdlog/include"
-main.o: main.cpp
-	$(CXX) $(CXXFLAGS) main.cpp -lboost_system -lboost_thread -lpthread -I "spdlog/include"
+Logger.o: src/Logger.cpp include/Logger.h
+	$(CXX) $(CXXFLAGS) "src/Logger.cpp" -I "spdlog/include"
+ConfigReader.o: src/ConfigReader.cpp include/ConfigReader.h
+	$(CXX) $(CXXFLAGS) "src/ConfigReader.cpp"
+Session.o: src/Session.cpp include/Session.h
+	$(CXX) $(CXXFLAGS) "src/Session.cpp" -lboost_system -lboost_thread -lpthread  -I "spdlog/include"
+Server.o: src/Server.cpp include/Server.h
+	$(CXX) $(CXXFLAGS) "src/Server.cpp" -lboost_system -lboost_thread -lpthread  -I "spdlog/include"
+main.o: src/main.cpp
+	$(CXX) $(CXXFLAGS) "src/main.cpp" -lboost_system -lboost_thread -lpthread -I "spdlog/include"
 

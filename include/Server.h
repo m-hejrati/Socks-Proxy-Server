@@ -1,5 +1,5 @@
-#include "../Logger/Logger.h"
-#include "../Input/ConfigReader.h"
+#include "Logger.h"
+#include "ConfigReader.h"
 #include "Session.h"
 
 #include <string>

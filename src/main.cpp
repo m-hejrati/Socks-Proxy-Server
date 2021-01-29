@@ -1,6 +1,6 @@
 // include dependent class
-#include "Proxy/Server.h"
-#include "Logger/Logger.h"
+#include "../include/Server.h"
+#include "../include/Logger.h"
 
 #include <iostream> 
 #include <boost/asio.hpp>
