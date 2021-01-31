@@ -13,6 +13,8 @@ private:
 
     std::vector<std::string> filIps;
     std::vector<std::string> filPorts;
+    std::vector<std::string> filProtocol;
+    std::vector< std::pair<std::string, std::string> > filIPPort;
 
 public:
 
@@ -20,7 +22,7 @@ public:
     void readConf(std::string address);
 
     // check ip and port constraint
-    bool checkFilter(std::string remote_host_, std::string remote_port_);
+    int checkFilter(std::string remote_host_, std::string remote_port_);
 
 };
 

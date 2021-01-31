@@ -174,12 +174,29 @@ void Session::do_resolve(){
 		[this, self](const boost::system::error_code& ec, tcp::resolver::iterator it){
 			
 			if (!ec){
-				
+
 				// filter
-				if (configReader.checkFilter(remote_host_, remote_port_))
-					logger3.log("Filtered address ...\n", "warn");
-				else
+				int status = configReader.checkFilter(remote_host_, remote_port_);
+				
+				if (status == 0){
+
 					do_connect(it);
+				
+				} else {
+
+					in_socket_.close();
+					out_socket_.close();
+
+					if (status == 1)
+						logger3.log("Filter by IP", "warn");
+					else if (status == 2)
+						logger3.log("Filter by Port", "warn");
+					else if (status == 3)
+						logger3.log("Filter by Protocol", "warn");
+					else if (status == 4)
+						logger3.log("Filter by pair of Ip & Port", "warn");
+
+				}
 			
 			}else{
 			
