@@ -18,8 +18,16 @@ public:
 	// constructor of server class
 	Server(boost::asio::io_service& io_service, short port, unsigned buffer_size, std::string logType);
 
+	void start();
+	
 	// print (log) the amount of logVariables
 	void printLogVars ();
+
+	// log every minute
+	void logEveryMinute();
+
+	// reset all the log variables
+	void resetVariables();
 
 private:
 
