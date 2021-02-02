@@ -25,6 +25,8 @@ Server::Server(boost::asio::io_service& io_service, short port, unsigned buffer_
 //asynchronously accept new connections and create session
 void Server::do_accept(ConfigReader configReader){
 
+    printLogVars();
+
     acceptor_.async_accept(in_socket_, [this, configReader](boost::system::error_code ec){
 
         if (!ec){     
@@ -41,6 +43,27 @@ void Server::do_accept(ConfigReader configReader){
 
         do_accept(configReader);
     });
+}
+
+void Server::printLogVars (){
+
+    logger2.log("Print statistics ...", "info");
+
+    std::ostringstream tmp;  
+    tmp << "Pass Packet:    " << passPacket << "\t Pass Traffic:   " << passTraffic;
+    logger2.log(tmp.str(), "info");
+
+    tmp.str("");
+    tmp << "Active Session: " << activeSession << "\t Update Session: " << updateSession;
+    logger2.log(tmp.str(), "info");   
+
+    tmp.str("");
+    tmp << "Finish Session: " << finishSession << "\t New Session:    " << newSession;
+    logger2.log(tmp.str(), "info");
+
+    tmp.str("");
+    tmp << "Filter Packet:  " << filterPacket << "\t Filter Traffic: " << filterTraffic;
+    logger2.log(tmp.str(), "info");
 }
 
 // tcp::acceptor acceptor_;

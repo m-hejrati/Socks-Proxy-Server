@@ -1,6 +1,7 @@
 #include "Logger.h"
 #include "ConfigReader.h"
 #include "Session.h"
+#include "LogVariables.h"
 
 #include <string>
 #include <boost/asio.hpp>
@@ -16,6 +17,9 @@ public:
 
 	// constructor of server class
 	Server(boost::asio::io_service& io_service, short port, unsigned buffer_size, std::string logType);
+
+	// print (log) the amount of logVariables
+	void printLogVars ();
 
 private:
 
