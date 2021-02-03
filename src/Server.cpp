@@ -56,10 +56,17 @@ void Server::do_accept(ConfigReader configReader){
 }
 
 // print (log) the amount of logVariables
-void Server::printLogVars (){
+void Server::printLogVars (vector<int> preActive){
 
     logger2.log("Print statistics ...", "info");
 
+    // find number of updated session; sessions that was avtive one minute ago and send data in last one minute.
+    for (auto i : preActive)
+        for (int j : changeSessionsID)
+            if (i == j)
+                updateSession ++;
+
+    // print transfer byte in different scale
     std::ostringstream passTmp;
     if (passTraffic < 1000) 
         passTmp << passTraffic << " B";
@@ -76,6 +83,7 @@ void Server::printLogVars (){
     else if (filterTraffic >= 1000000)
         filterTmp << std::setprecision(4) << filterTraffic / 1048576.0 << " MB";
 
+    // print all variables
     std::ostringstream tmp;  
     tmp << "Pass Packet:    " << passPacket << "\t Pass Traffic:   " <<  passTmp.str();
     logger2.log(tmp.str(), "info");
@@ -97,18 +105,25 @@ void Server::printLogVars (){
 void Server::logEveryMinute(){
 
     mutex mtx;
+    // create a new vector to hold sessions that was active one minute ago
+    vector<int> preActive;
 
     while(true){
+
+        // hold logEveryMinute execution for 60 seconds
+        std::this_thread::sleep_for(60s);
 
         // I put both read and reset functions in mutex,
         // because its possible to capture a packet after logging and before resetting, so the statistics will be wrong.
         mtx.lock();
-        printLogVars();
+ 
+        printLogVars(preActive);
         resetVariables();
-        mtx.unlock();
+        // save active session, to use them one minute later
+        preActive.clear();
+        preActive = activeSessionsID;
 
-        // hold logEveryMinute execution for 60 seconds
-        std::this_thread::sleep_for(60s);
+        mtx.unlock();
   }
 }
 

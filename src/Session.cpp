@@ -310,6 +310,8 @@ void Session::do_read(int direction){
 		in_socket_.async_receive(boost::asio::buffer(in_buf_),
 			[this, self, direction](boost::system::error_code ec, std::size_t length){
 				
+				changeSessionsID.insert(session_id_);
+
 				if (!ec){
 					
 					std::ostringstream tmp; 
@@ -346,6 +348,8 @@ void Session::do_read(int direction){
 		out_socket_.async_receive(boost::asio::buffer(out_buf_),
 			[this, self, direction](boost::system::error_code ec, std::size_t length){
 			
+				changeSessionsID.insert(session_id_);
+
 				if (!ec){
 				
 					std::ostringstream tmp; 
@@ -392,6 +396,8 @@ void Session::do_write(int direction, std::size_t Length){
 			boost::asio::async_write(out_socket_, boost::asio::buffer(in_buf_, Length),
 				[this, self, direction](boost::system::error_code ec, std::size_t length){
 				
+					changeSessionsID.insert(session_id_);
+
 					if (!ec){
 
 						mtx.lock();
@@ -418,6 +424,8 @@ void Session::do_write(int direction, std::size_t Length){
 			boost::asio::async_write(in_socket_, boost::asio::buffer(out_buf_, Length),
 				[this, self, direction](boost::system::error_code ec, std::size_t length){
 				
+					changeSessionsID.insert(session_id_);
+
 					if (!ec){
 
 						mtx.lock();

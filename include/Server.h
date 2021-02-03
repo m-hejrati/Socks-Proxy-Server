@@ -21,7 +21,7 @@ public:
 	void start();
 	
 	// print (log) the amount of logVariables
-	void printLogVars ();
+	void printLogVars (vector<int> preActive);
 
 	// log every minute
 	void logEveryMinute();
