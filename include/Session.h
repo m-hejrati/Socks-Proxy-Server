@@ -55,6 +55,7 @@ private:
 	// direction 2: from out_buf message in_socket to client
 	void do_write(int direction, std::size_t Length);
 
+	void logFinishSession();
 
 	tcp::socket in_socket_; // a socket in client side
 	tcp::socket out_socket_; // a socket in server side

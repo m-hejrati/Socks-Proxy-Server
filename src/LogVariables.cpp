@@ -3,7 +3,7 @@
 
 int passPacket = 0;
 int passTraffic = 0;
-int activeSession = 0;
+std::vector <int> activeSessionsID;
 int updateSession = 0;
 int finishSession = 0;
 int newSession = 0; 

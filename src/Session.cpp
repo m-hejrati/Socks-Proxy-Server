@@ -19,6 +19,10 @@ Session::Session(tcp::socket in_socket, unsigned session_id, size_t buffer_size,
 
         logger3.setConfigType(logType);
 
+		mtx.lock();
+		activeSessionsID.push_back(session_id);
+		newSession ++;
+		mtx.unlock();
 }
 
 
@@ -47,6 +51,7 @@ void Session::read_socks5_handshake()
 					std::ostringstream tmp;  
 					tmp << session_id_ << ": Closing session; SOCKS5 handshake request is invalid.";
 					logger3.log(tmp.str(), "error");
+					logFinishSession();
 					return;
 				}
 
@@ -89,6 +94,7 @@ void Session::write_socks5_handshake(){
 					std::ostringstream tmp;  
 					tmp << session_id_ << ": Closing Session; No appropriate auth method found. ";
 					logger3.log(tmp.str(), "error");
+					logFinishSession();
 					return;
 				}
 			
@@ -121,6 +127,7 @@ void Session::read_socks5_request(){
 					std::ostringstream tmp;  
 					tmp << session_id_ << ": Closing session; SOCKS5 request is invalid. ";
 					logger3.log(tmp.str(), "error");
+					logFinishSession();
 					return;
 				}
 
@@ -134,6 +141,7 @@ void Session::read_socks5_request(){
 							std::ostringstream tmp;  
 							tmp << session_id_ << ": Closing session; SOCKS5 request length is invalid. ";
 							logger3.log(tmp.str(), "error");
+							logFinishSession();
 							return; 
 						}
 						remote_host_ = boost::asio::ip::address_v4(ntohl(*((uint32_t*)&in_buf_[4]))).to_string();
@@ -146,6 +154,7 @@ void Session::read_socks5_request(){
 							std::ostringstream tmp;  
 							tmp << session_id_ << ": Closing session; SOCKS5 request length is invalid. ";
 							logger3.log(tmp.str(), "error");
+							logFinishSession();
 							return; 
 						}
 						remote_host_ = std::string(&in_buf_[5], host_length);
@@ -156,6 +165,7 @@ void Session::read_socks5_request(){
 						std::ostringstream tmp;  
 						tmp << session_id_ << ": Closing session; unsupport address type in SOCKS5 request. ";
 						logger3.log(tmp.str(), "error");
+						logFinishSession();
 						return;
 				}
 
@@ -304,7 +314,7 @@ void Session::do_read(int direction){
 					
 					std::ostringstream tmp; 
 					tmp << session_id_ << ": --> " << std::to_string(length) << " bytes";
-					logger3.log(tmp.str(), "info");
+					logger3.log(tmp.str(), "debug");
 
 					if (isFilter){
 
@@ -326,6 +336,7 @@ void Session::do_read(int direction){
 					// Most probably client closed socket. Let's close both sockets and exit session.
 					in_socket_.close();
 					out_socket_.close();
+					logFinishSession();
 				}
 
 			});
@@ -339,7 +350,7 @@ void Session::do_read(int direction){
 				
 					std::ostringstream tmp; 
 					tmp << session_id_ << ": <-- " << std::to_string(length) << " bytes";
-					logger3.log(tmp.str(), "info");
+					logger3.log(tmp.str(), "debug");
 
 					if (isFilter){
 
@@ -361,6 +372,7 @@ void Session::do_read(int direction){
 					// Most probably remote server closed socket. Let's close both sockets and exit session.
 					in_socket_.close();
 					out_socket_.close();
+					logFinishSession();
 				}
 			});
 }
@@ -396,6 +408,7 @@ void Session::do_write(int direction, std::size_t Length){
 						// Most probably client closed socket. Let's close both sockets and exit session.
 						in_socket_.close();
 						out_socket_.close();
+						logFinishSession();
 					}
 				});
 			break;
@@ -421,10 +434,26 @@ void Session::do_write(int direction, std::size_t Length){
 						// Most probably remote server closed socket. Let's close both sockets and exit session.
 						in_socket_.close();
 						out_socket_.close();
+						logFinishSession();
 					}
 				});
 			break;
 	}
+}
+
+// find the session in active list and remove it and also increase finish sessoin number
+void Session::logFinishSession(){
+
+	mtx.lock();
+
+	std::vector<int>::iterator position = std::find(activeSessionsID.begin(), activeSessionsID.end(), session_id_);
+	// position == end() means the element was not found
+	if (position != activeSessionsID.end()){ 
+	    activeSessionsID.erase(position);
+		finishSession ++;
+	}
+
+	mtx.unlock();
 }
 
 

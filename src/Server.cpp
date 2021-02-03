@@ -81,7 +81,7 @@ void Server::printLogVars (){
     logger2.log(tmp.str(), "info");
 
     tmp.str("");
-    tmp << "Active Session: " << activeSession << "\t Update Session: " << updateSession;
+    tmp << "Active Session: " << activeSessionsID.size() << "\t Update Session: " << updateSession;
     logger2.log(tmp.str(), "info");   
 
     tmp.str("");
@@ -117,7 +117,6 @@ void Server::resetVariables(){
 
     passPacket = 0;
     passTraffic = 0;
-    activeSession = 0;
     updateSession = 0;
     finishSession = 0;
     newSession = 0; 
