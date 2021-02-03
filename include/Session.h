@@ -3,6 +3,7 @@
 
 #include <boost/asio.hpp>
 #include <iostream>
+#include <mutex>
 
 using boost::asio::ip::tcp;
 
@@ -65,6 +66,8 @@ private:
 	int session_id_;
     Logger logger3;
 	ConfigReader configReader;
+	bool isFilter;
+	mutex mtx;
 
 };
 

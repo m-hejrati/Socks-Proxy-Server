@@ -60,8 +60,24 @@ void Server::printLogVars (){
 
     logger2.log("Print statistics ...", "info");
 
+    std::ostringstream passTmp;
+    if (passTraffic < 1000) 
+        passTmp << passTraffic << " B";
+    else if (passTraffic >= 1000 && passTraffic < 1000000)
+        passTmp << std::setprecision(4) << passTraffic / 1024.0 << " KB";
+    else if (passTraffic >= 1000000)
+        passTmp << std::setprecision(4) << passTraffic / 1048576.0 << " MB";
+
+    std::ostringstream filterTmp;
+    if (filterTraffic < 1000) 
+        filterTmp << filterTraffic << " B";
+    else if (filterTraffic >= 1000 && filterTraffic < 1000000)
+        filterTmp << std::setprecision(4) << filterTraffic / 1024.0 << " KB";
+    else if (filterTraffic >= 1000000)
+        filterTmp << std::setprecision(4) << filterTraffic / 1048576.0 << " MB";
+
     std::ostringstream tmp;  
-    tmp << "Pass Packet:    " << passPacket << "\t Pass Traffic:   " << passTraffic;
+    tmp << "Pass Packet:    " << passPacket << "\t Pass Traffic:   " <<  passTmp.str();
     logger2.log(tmp.str(), "info");
 
     tmp.str("");
@@ -73,7 +89,7 @@ void Server::printLogVars (){
     logger2.log(tmp.str(), "info");
 
     tmp.str("");
-    tmp << "Filter Packet:  " << filterPacket << "\t Filter Traffic: " << filterTraffic;
+    tmp << "Filter Packet:  " << filterPacket << "\t Filter Traffic: " << filterTmp.str();
     logger2.log(tmp.str(), "info");
 }
 

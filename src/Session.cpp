@@ -1,4 +1,5 @@
 #include "Session.h"
+#include "LogVariables.h"
 
 #include <boost/asio.hpp>
 #include <inttypes.h>
@@ -13,7 +14,8 @@ Session::Session(tcp::socket in_socket, unsigned session_id, size_t buffer_size,
     in_buf_(buffer_size), 
     out_buf_(buffer_size), 
     session_id_(session_id),
-	configReader (configReader_) {
+	configReader (configReader_),
+	isFilter (0){
 
         logger3.setConfigType(logType);
 
@@ -43,7 +45,7 @@ void Session::read_socks5_handshake()
 				if (length < 3 || in_buf_[0] != 0x05){
 
 					std::ostringstream tmp;  
-					tmp << session_id_ << ": SOCKS5 handshake request is invalid. Closing session...";
+					tmp << session_id_ << ": Closing session; SOCKS5 handshake request is invalid.";
 					logger3.log(tmp.str(), "error");
 					return;
 				}
@@ -82,8 +84,13 @@ void Session::write_socks5_handshake(){
 
 			if (!ec){
 				
-				if (in_buf_[1] == 0xFF)
-					return; // No appropriate auth method found. Close session.
+				if (in_buf_[1] == 0xFF){
+
+					std::ostringstream tmp;  
+					tmp << session_id_ << ": Closing Session; No appropriate auth method found. ";
+					logger3.log(tmp.str(), "error");
+					return;
+				}
 			
 				read_socks5_request();
 				
@@ -112,7 +119,7 @@ void Session::read_socks5_request(){
 				if (length < 5 || in_buf_[0] != 0x05 || in_buf_[1] != 0x01){
 					
 					std::ostringstream tmp;  
-					tmp << session_id_ << ": SOCKS5 request is invalid. Closing session... ";
+					tmp << session_id_ << ": Closing session; SOCKS5 request is invalid. ";
 					logger3.log(tmp.str(), "error");
 					return;
 				}
@@ -125,7 +132,7 @@ void Session::read_socks5_request(){
 					case 0x01: // IP V4 addres
 						if (length != 10) { 
 							std::ostringstream tmp;  
-							tmp << session_id_ << ": SOCKS5 request length is invalid. Closing session... ";
+							tmp << session_id_ << ": Closing session; SOCKS5 request length is invalid. ";
 							logger3.log(tmp.str(), "error");
 							return; 
 						}
@@ -137,7 +144,7 @@ void Session::read_socks5_request(){
 						host_length = in_buf_[4];
 						if (length != (size_t)(5 + host_length + 2)) {
 							std::ostringstream tmp;  
-							tmp << session_id_ << ": SOCKS5 request length is invalid. Closing session... ";
+							tmp << session_id_ << ": Closing session; SOCKS5 request length is invalid. ";
 							logger3.log(tmp.str(), "error");
 							return; 
 						}
@@ -147,9 +154,9 @@ void Session::read_socks5_request(){
 						
 					default:
 						std::ostringstream tmp;  
-						tmp << session_id_ << ": unsupport_ed address type in SOCKS5 request. Closing session... ";
+						tmp << session_id_ << ": Closing session; unsupport address type in SOCKS5 request. ";
 						logger3.log(tmp.str(), "error");
-						break;
+						return;
 				}
 
 				do_resolve();
@@ -157,7 +164,7 @@ void Session::read_socks5_request(){
 			}else{
 				
 				std::ostringstream tmp;  
-				tmp << session_id_ << ": SOCKS5 request read " << ec.message();
+				tmp << session_id_ << ": SOCKS5 request read, " << ec.message();
 				logger3.log(tmp.str(), "error");
 			}
 		});
@@ -180,23 +187,38 @@ void Session::do_resolve(){
 				
 				if (status == 0){
 
-					do_connect(it);
+					isFilter = 0;
 				
 				} else {
 
-					in_socket_.close();
-					out_socket_.close();
+					isFilter = 1;
 
-					if (status == 1)
-						logger3.log("Filter by IP", "warn");
-					else if (status == 2)
-						logger3.log("Filter by Port", "warn");
-					else if (status == 3)
-						logger3.log("Filter by Protocol", "warn");
-					else if (status == 4)
-						logger3.log("Filter by pair of Ip & Port", "warn");
+					std::ostringstream tmp;  
+					tmp << session_id_ << ": ";
 
+					if (status == 1){
+
+						tmp << "Filter by IP";
+						logger3.log(tmp.str(), "warn");
+
+					}else if (status == 2){
+						
+						tmp << "Filter by Port";
+						logger3.log(tmp.str(), "warn");
+
+					}else if (status == 3){
+						
+						tmp << "Filter by Protocol";
+						logger3.log(tmp.str(), "warn");
+					
+					}else if (status == 4){
+
+						tmp << "Filter by pair of Ip & Port";
+						logger3.log(tmp.str(), "warn");
+					}
 				}
+
+				do_connect(it);
 			
 			}else{
 			
@@ -276,7 +298,7 @@ void Session::do_read(int direction){
 	// read from client
 	if (direction & 0x1)
 		in_socket_.async_receive(boost::asio::buffer(in_buf_),
-			[this, self](boost::system::error_code ec, std::size_t length){
+			[this, self, direction](boost::system::error_code ec, std::size_t length){
 				
 				if (!ec){
 					
@@ -284,7 +306,17 @@ void Session::do_read(int direction){
 					tmp << session_id_ << ": --> " << std::to_string(length) << " bytes";
 					logger3.log(tmp.str(), "info");
 
-					do_write(1, length);
+					if (isFilter){
+
+						mtx.lock();
+						filterPacket ++;
+						filterTraffic += length;
+						mtx.unlock();
+
+						do_read(1);
+					
+					}else
+						do_write(1, length);
 				
 				}else{ //if (ec != boost::asio::error::eof)
 				
@@ -301,7 +333,7 @@ void Session::do_read(int direction){
 	// read from server
 	if (direction & 0x2)
 		out_socket_.async_receive(boost::asio::buffer(out_buf_),
-			[this, self](boost::system::error_code ec, std::size_t length){
+			[this, self, direction](boost::system::error_code ec, std::size_t length){
 			
 				if (!ec){
 				
@@ -309,8 +341,18 @@ void Session::do_read(int direction){
 					tmp << session_id_ << ": <-- " << std::to_string(length) << " bytes";
 					logger3.log(tmp.str(), "info");
 
-					do_write(2, length);
-				
+					if (isFilter){
+
+						mtx.lock();
+						filterPacket ++;
+						filterTraffic += length;
+						mtx.unlock();
+
+						do_read(2);
+					
+					}else
+						do_write(2, length);					
+
 				}else{ //if (ec != boost::asio::error::eof)
 
 					std::ostringstream tmp; 
@@ -338,10 +380,16 @@ void Session::do_write(int direction, std::size_t Length){
 			boost::asio::async_write(out_socket_, boost::asio::buffer(in_buf_, Length),
 				[this, self, direction](boost::system::error_code ec, std::size_t length){
 				
-					if (!ec)
+					if (!ec){
+
+						mtx.lock();
+						passPacket ++;
+						passTraffic += length;
+						mtx.unlock();
+
 						do_read(direction);
-					
-					else{
+
+					}else{
 						std::ostringstream tmp; 
 						tmp << session_id_ << ": closing session. Client socket write error ", ec.message();
 						logger3.log(tmp.str(), "warn");
@@ -357,10 +405,16 @@ void Session::do_write(int direction, std::size_t Length){
 			boost::asio::async_write(in_socket_, boost::asio::buffer(out_buf_, Length),
 				[this, self, direction](boost::system::error_code ec, std::size_t length){
 				
-					if (!ec)
+					if (!ec){
+
+						mtx.lock();
+						passPacket ++;
+						passTraffic += length;
+						mtx.unlock();
+						
 						do_read(direction);
 					
-					else{
+					}else{
 						std::ostringstream tmp; 
 						tmp << session_id_ << ": closing session. Remote socket write error ", ec.message();
 						logger3.log(tmp.str(), "warn");
@@ -385,3 +439,5 @@ std::vector<char> out_buf_;
 int session_id_;
 Logger logger3;
 ConfigReader configReader;
+bool isFilter;
+mutex mtx;
