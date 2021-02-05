@@ -66,26 +66,9 @@ void Server::printLogVars (vector<int> preActive){
             if (i == j)
                 updateSession ++;
 
-    // print transfer byte in different scale
-    std::ostringstream passTmp;
-    if (passTraffic < 1000) 
-        passTmp << passTraffic << " B";
-    else if (passTraffic >= 1000 && passTraffic < 1000000)
-        passTmp << std::setprecision(4) << passTraffic / 1024.0 << " KB";
-    else if (passTraffic >= 1000000)
-        passTmp << std::setprecision(4) << passTraffic / 1048576.0 << " MB";
-
-    std::ostringstream filterTmp;
-    if (filterTraffic < 1000) 
-        filterTmp << filterTraffic << " B";
-    else if (filterTraffic >= 1000 && filterTraffic < 1000000)
-        filterTmp << std::setprecision(4) << filterTraffic / 1024.0 << " KB";
-    else if (filterTraffic >= 1000000)
-        filterTmp << std::setprecision(4) << filterTraffic / 1048576.0 << " MB";
-
     // print all variables
     std::ostringstream tmp;  
-    tmp << "Pass Packet:    " << passPacket << "\t Pass Traffic:   " <<  passTmp.str();
+    tmp << "Pass Packet:    " << passPacket << "\t Pass Traffic:   " <<  unitConversion(passTraffic);
     logger2.log(tmp.str(), "info");
 
     tmp.str("");
@@ -97,7 +80,7 @@ void Server::printLogVars (vector<int> preActive){
     logger2.log(tmp.str(), "info");
 
     tmp.str("");
-    tmp << "Filter Packet:  " << filterPacket << "\t Filter Traffic: " << filterTmp.str();
+    tmp << "Filter Packet:  " << filterPacket << "\t Filter Traffic: " << unitConversion(filterTraffic);
     logger2.log(tmp.str(), "info");
 
     tmp.str("");
@@ -107,7 +90,7 @@ void Server::printLogVars (vector<int> preActive){
         tmp << "Specified Domains to log: " << it->first;
         logger2.log(tmp.str(), "info");
         tmp.str("");
-        tmp << "Number of sessions: " << it->second << "\t Traffic of sessions: " << domainTraffic[it->first];
+        tmp << "Number of sessions: " << it->second << "\t Traffic of sessions: " << unitConversion(domainTraffic[it->first]);
         logger2.log(tmp.str(), "info");
     }
 }
@@ -138,6 +121,7 @@ void Server::logEveryMinute(){
   }
 }
 
+
 // reset all the log variables
 void Server::resetVariables(){
 
@@ -151,6 +135,22 @@ void Server::resetVariables(){
     domainSession.clear();
     domainTraffic.clear();
 }
+
+
+// get data and convert to its appropriate unit
+std::string Server::unitConversion(int data){
+	
+    std::ostringstream tmp;
+    if (data < 1000) 
+        tmp << data << " B";
+    else if (data >= 1000 && data < 1000000)
+        tmp << std::setprecision(4) << data / 1024.0 << " KB";
+    else if (data >= 1000000)
+        tmp << std::setprecision(4) << data / 1048576.0 << " MB";	
+	
+	return tmp.str();
+}
+
 
 // tcp::acceptor acceptor_;
 // tcp::socket in_socket_;

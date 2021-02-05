@@ -29,6 +29,9 @@ public:
 	// reset all the log variables
 	void resetVariables();
 
+	// get data and convert to its appropriate unit
+	std::string unitConversion(int data);
+	
 private:
 
 	//asynchronously accept new connections and create session
