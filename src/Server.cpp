@@ -99,6 +99,17 @@ void Server::printLogVars (vector<int> preActive){
     tmp.str("");
     tmp << "Filter Packet:  " << filterPacket << "\t Filter Traffic: " << filterTmp.str();
     logger2.log(tmp.str(), "info");
+
+    tmp.str("");
+    std::map<std::string, int>::iterator it;
+    for(it = domainSession.begin(); it != domainSession.end(); ++it){
+        tmp.str("");
+        tmp << "Specified Domains to log: " << it->first;
+        logger2.log(tmp.str(), "info");
+        tmp.str("");
+        tmp << "Number of sessions: " << it->second << "\t Traffic of sessions: " << domainTraffic[it->first];
+        logger2.log(tmp.str(), "info");
+    }
 }
 
 // log every minute
@@ -137,6 +148,8 @@ void Server::resetVariables(){
     newSession = 0; 
     filterPacket = 0;
     filterTraffic = 0;
+    domainSession.clear();
+    domainTraffic.clear();
 }
 
 // tcp::acceptor acceptor_;

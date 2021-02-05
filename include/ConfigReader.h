@@ -1,3 +1,5 @@
+#include "LogVariables.h"
+
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
@@ -24,6 +26,8 @@ public:
     // check ip and port and domain constraint
     int checkFilter(std::string remote_host_, std::string remote_port_, std::string r_domain_);
 
+	// check if domain name is in log domain list
+	std::string checkLog(std::string domain_name);
 };
 
 

@@ -49,6 +49,12 @@ void ConfigReader::readConf(std::string address){
 
         filDomains.push_back(domain.second.data());
     }
+
+    for (boost::property_tree::ptree::value_type &domain : root.get_child("logDomain")){
+
+        domainSession.insert(make_pair(domain.second.data(), 0));
+        domainTraffic.insert(make_pair(domain.second.data(), 0));
+    }
 }
 
 
@@ -72,9 +78,20 @@ int ConfigReader::checkFilter(std::string remote_host_, std::string remote_port_
             return 4;
 
     for (std::string& domain : filDomains)
-        if (domain.find(r_domain_) == std::string::npos)
+        if (r_domain_.find(domain) != std::string::npos)
             return 5;
 
     return 0;
 }
 
+
+// check if domain name is in log domain list
+std::string ConfigReader::checkLog(std::string domain_name){
+
+    std::map<std::string, int>::iterator it;
+    for(it = domainSession.begin(); it != domainSession.end(); ++it)
+        if (domain_name.find(it->first) != std::string::npos)
+            return it->first;
+            
+    return "NO";
+}

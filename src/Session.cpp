@@ -15,7 +15,8 @@ Session::Session(tcp::socket in_socket, unsigned session_id, size_t buffer_size,
     out_buf_(buffer_size), 
     session_id_(session_id),
 	configReader (configReader_),
-	isFilter (0){
+	isFilter (0),
+	isLog ("NO") {
 
         logger3.setConfigType(logType);
 
@@ -171,6 +172,15 @@ void Session::read_socks5_request(){
 
 				storeDomainName();
 
+				// check in the log domain list to know if it should log or not 
+				isLog = configReader.checkLog(domain_name.str());
+				// if it should log ++ number of sessions
+				if (isLog.compare("NO") != 0){
+					mtx.lock();
+					domainSession[isLog] ++;
+					mtx.unlock();
+				}
+
 				do_resolve();
 
 			}else{
@@ -325,6 +335,13 @@ void Session::do_read(int direction){
 					tmp << session_id_ << ": --> " << std::to_string(length) << " bytes";
 					logger3.log(tmp.str(), "debug");
 
+					// both filtered and unfiltered packet that pass through this session
+					if (isLog.compare("NO") != 0){
+						mtx.lock();
+						domainTraffic[isLog] += length;
+						mtx.unlock();
+					}
+
 					if (isFilter){
 
 						mtx.lock();
@@ -362,6 +379,13 @@ void Session::do_read(int direction){
 					std::ostringstream tmp; 
 					tmp << session_id_ << ": <-- " << std::to_string(length) << " bytes";
 					logger3.log(tmp.str(), "debug");
+
+					// both filtered and unfiltered packet that pass through this session
+					if (isLog.compare("NO") != 0){
+						mtx.lock();
+						domainTraffic[isLog] += length;
+						mtx.unlock();
+					}
 
 					if (isFilter){
 
@@ -514,4 +538,5 @@ int session_id_;
 Logger logger3;
 ConfigReader configReader;
 bool isFilter;
+std::string isLog;
 mutex mtx;

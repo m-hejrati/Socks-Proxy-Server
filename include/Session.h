@@ -73,6 +73,7 @@ private:
     Logger logger3;
 	ConfigReader configReader;
 	bool isFilter;
+	std::string isLog;
 	mutex mtx;
 
 };
