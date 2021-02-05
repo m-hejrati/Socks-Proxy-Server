@@ -1,7 +1,7 @@
 {
 	"IP" : [ ],
 	"Port" : [ "1" ],
-	"Protocol" : [ "https" ],
+	"Protocol" : [  ],
 	"IPPort" :
 	{
 		"91.198.174.192" : "443",

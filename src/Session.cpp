@@ -169,6 +169,8 @@ void Session::read_socks5_request(){
 						return;
 				}
 
+				storeDomainName();
+
 				do_resolve();
 
 			}else{
@@ -449,6 +451,7 @@ void Session::do_write(int direction, std::size_t Length){
 	}
 }
 
+
 // find the session in active list and remove it and also increase finish sessoin number
 void Session::logFinishSession(){
 
@@ -465,12 +468,41 @@ void Session::logFinishSession(){
 }
 
 
+// get IP and store domain name
+void Session::storeDomainName(){
+
+	std::ostringstream command; 
+	command <<  "dig -x " << remote_host_ << " +short";
+
+	std::cout << command.str() << endl;
+
+	FILE *fpipe;
+    char c = 0;
+
+    if (0 == (fpipe = (FILE*)popen(command.str().c_str(), "r"))){
+
+		std::ostringstream tmp; 
+		tmp << "Error in popen";
+		logger3.log(tmp.str(), "error");
+        exit(1);
+    }
+
+    domain_name.str("");
+    while (fread(&c, sizeof c, 1, fpipe)){
+        domain_name << c;
+    }
+
+    pclose(fpipe);
+}
+
+
 // tcp::socket in_socket_;
 // tcp::socket out_socket_;
 // tcp::resolver resolver;
 
 std::string remote_host_;
 std::string remote_port_;
+std::ostringstream domain_name;
 std::vector<char> in_buf_;
 std::vector<char> out_buf_;
 int session_id_;

@@ -55,13 +55,18 @@ private:
 	// direction 2: from out_buf message in_socket to client
 	void do_write(int direction, std::size_t Length);
 
+	// find the session in active list and remove it and also increase finish sessoin number
 	void logFinishSession();
+
+	// get IP and store domain name
+	void storeDomainName();
 
 	tcp::socket in_socket_; // a socket in client side
 	tcp::socket out_socket_; // a socket in server side
 	tcp::resolver resolver;
 	std::string remote_host_;
 	std::string remote_port_;
+	std::ostringstream domain_name;
 	std::vector<char> in_buf_; // a buffer to store client messages
 	std::vector<char> out_buf_; // a buffer to store server messages
 	int session_id_;
