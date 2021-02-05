@@ -2,7 +2,8 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-
+#include <string>
+#include <regex>
 
 #ifndef CONF_H
 #define CONF_H

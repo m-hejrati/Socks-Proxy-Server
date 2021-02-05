@@ -1,7 +1,5 @@
 #include "ConfigReader.h"
 
-#include <string>
-
 
 std::vector<std::string> filIps;
 std::vector<std::string> filPorts;
@@ -59,7 +57,7 @@ void ConfigReader::readConf(std::string address){
 
 
 // check ip and port and domain constraint
-int ConfigReader::checkFilter(std::string remote_host_, std::string remote_port_, std::string r_domain_){
+int ConfigReader::checkFilter(std::string remote_host_, std::string remote_port_, std::string domain_name){
 
     for (std::string& ip : filIps)
         if (ip.compare(remote_host_) == 0)
@@ -78,7 +76,7 @@ int ConfigReader::checkFilter(std::string remote_host_, std::string remote_port_
             return 4;
 
     for (std::string& domain : filDomains)
-        if (r_domain_.find(domain) != std::string::npos)
+        if (std::regex_match(domain_name, std::regex(domain)))
             return 5;
 
     return 0;
@@ -90,7 +88,7 @@ std::string ConfigReader::checkLog(std::string domain_name){
 
     std::map<std::string, int>::iterator it;
     for(it = domainSession.begin(); it != domainSession.end(); ++it)
-        if (domain_name.find(it->first) != std::string::npos)
+        if (std::regex_match(domain_name, std::regex(it->first)))
             return it->first;
             
     return "NO";
