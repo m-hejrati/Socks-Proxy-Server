@@ -1,11 +1,13 @@
 {
 	"IP" : [ ],
 	"Port" : [ "1" ],
-	"Protocol" : [  ],
+	"Protocol" : [ "http" ],
 	"IPPort" :
 	{
 		"91.198.174.192" : "443",
 		"1.1.1.1" : "1"
-	}
+	},
+	"filterDomain" : [ ".1e100.net" ],
+	"logDomain" : [ ]
 }
 

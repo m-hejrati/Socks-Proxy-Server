@@ -195,7 +195,7 @@ void Session::do_resolve(){
 			if (!ec){
 
 				// filter
-				int status = configReader.checkFilter(remote_host_, remote_port_);
+				int status = configReader.checkFilter(remote_host_, remote_port_, domain_name.str());
 				
 				if (status == 0){
 
@@ -226,6 +226,11 @@ void Session::do_resolve(){
 					}else if (status == 4){
 
 						tmp << "Filter by pair of Ip & Port";
+						logger3.log(tmp.str(), "warn");
+
+					}else if (status == 5){
+
+						tmp << "Filter by domain name";
 						logger3.log(tmp.str(), "warn");
 					}
 				}
@@ -474,8 +479,6 @@ void Session::storeDomainName(){
 	std::ostringstream command; 
 	command <<  "dig -x " << remote_host_ << " +short";
 
-	std::cout << command.str() << endl;
-
 	FILE *fpipe;
     char c = 0;
 
@@ -491,6 +494,8 @@ void Session::storeDomainName(){
     while (fread(&c, sizeof c, 1, fpipe)){
         domain_name << c;
     }
+
+	logger3.log(domain_name.str(), "debug");
 
     pclose(fpipe);
 }

@@ -21,8 +21,8 @@ public:
     // read config file and store filter ip and port
     void readConf(std::string address);
 
-    // check ip and port constraint
-    int checkFilter(std::string remote_host_, std::string remote_port_);
+    // check ip and port and domain constraint
+    int checkFilter(std::string remote_host_, std::string remote_port_, std::string r_domain_);
 
 };
 
