@@ -4,12 +4,21 @@
 #include <iostream> 
 #include <boost/asio.hpp>
 #include <sstream> // for ostringstream used in logger
-
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 int main(){
 
-	// set default log level to info, until reading config file
-	Logger logger1("info");
+	// Create a root
+	boost::property_tree::ptree root;
+	// Load the json file in this ptree
+	boost::property_tree::read_json("../config.json", root);
+	std::string type = root.get<std::string> ("LogLevel");
+	
+	Logger logger1(type);
+
+    logger1.log("    \"Proxy Server\"", "info");
+    logger1.log("    \"Mahdi Hejrati\"", "info");
 
 	// create a buffer to make log with it using ostringstream
 	std::ostringstream tmp;  

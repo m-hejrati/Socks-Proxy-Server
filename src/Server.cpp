@@ -58,7 +58,8 @@ void Server::do_accept(ConfigReader configReader){
 // print (log) the amount of logVariables
 void Server::printLogVars (vector<int> preActive){
 
-    logger2.log("Print statistics ...", "info");
+    logger2.log(" ", "info");
+    logger2.log("Print statistics ...\n", "info");
 
     // find number of updated session; sessions that was avtive one minute ago and send data in last one minute.
     for (auto i : preActive)
@@ -93,6 +94,8 @@ void Server::printLogVars (vector<int> preActive){
         tmp << "Number of sessions: " << it->second << "\t Traffic of sessions: " << unitConversion(domainTraffic[it->first]);
         logger2.log(tmp.str(), "info");
     }
+
+    logger2.log(" ", "info");
 }
 
 // log every minute
