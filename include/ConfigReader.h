@@ -25,10 +25,10 @@ public:
     void readConf(std::string address);
 
     // check ip and port and domain constraint
-    int checkFilter(std::string remote_host_, std::string remote_port_, std::string r_domain_);
+    int checkFilter(std::string remote_host_, std::string remote_port_, std::vector<std::string> domains);
 
 	// check if domain name is in log domain list
-	std::string checkLog(std::string domain_name);
+	std::string checkLog(std::vector<std::string> domains);
 };
 
 

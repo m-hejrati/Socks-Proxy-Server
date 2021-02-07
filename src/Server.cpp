@@ -135,8 +135,11 @@ void Server::resetVariables(){
     newSession = 0; 
     filterPacket = 0;
     filterTraffic = 0;
-    domainSession.clear();
-    domainTraffic.clear();
+    std::map<std::string, int>::iterator it;
+    for(it = domainSession.begin(); it != domainSession.end(); ++it)
+        it->second = 0;
+    for(it = domainTraffic.begin(); it != domainTraffic.end(); ++it)
+        it->second = 0;
 }
 
 

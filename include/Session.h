@@ -66,7 +66,7 @@ private:
 	tcp::resolver resolver;
 	std::string remote_host_;
 	std::string remote_port_;
-	std::ostringstream domain_name;
+	std::vector<std::string> domains;
 	std::vector<char> in_buf_; // a buffer to store client messages
 	std::vector<char> out_buf_; // a buffer to store server messages
 	int session_id_;

@@ -173,7 +173,7 @@ void Session::read_socks5_request(){
 				storeDomainName();
 
 				// check in the log domain list to know if it should log or not 
-				isLog = configReader.checkLog(domain_name.str());
+				isLog = configReader.checkLog(domains);
 				// if it should log ++ number of sessions
 				if (isLog.compare("NO") != 0){
 					mtx.lock();
@@ -205,7 +205,7 @@ void Session::do_resolve(){
 			if (!ec){
 
 				// filter
-				int status = configReader.checkFilter(remote_host_, remote_port_, domain_name.str());
+				int status = configReader.checkFilter(remote_host_, remote_port_, domains);
 				
 				if (status == 0){
 
@@ -514,12 +514,18 @@ void Session::storeDomainName(){
         exit(1);
     }
 
-    domain_name.str("");
+	std::ostringstream domain_name;
     while (fread(&c, sizeof c, 1, fpipe)){
         domain_name << c;
     }
 
-	logger3.log(domain_name.str(), "debug");
+	// list of domains related to this ip/session
+	std::stringstream ss(domain_name.str().c_str());
+	std::string to;
+	// split domains by '\n'
+	if (domain_name.str().c_str() != NULL)
+		while(std::getline(ss,to,'\n'))
+			domains.push_back(to);
 
     pclose(fpipe);
 }
@@ -531,7 +537,7 @@ void Session::storeDomainName(){
 
 std::string remote_host_;
 std::string remote_port_;
-std::ostringstream domain_name;
+std::vector<std::string> domains;
 std::vector<char> in_buf_;
 std::vector<char> out_buf_;
 int session_id_;

@@ -57,7 +57,7 @@ void ConfigReader::readConf(std::string address){
 
 
 // check ip and port and domain constraint
-int ConfigReader::checkFilter(std::string remote_host_, std::string remote_port_, std::string domain_name){
+int ConfigReader::checkFilter(std::string remote_host_, std::string remote_port_, std::vector<std::string> domains){
 
     for (std::string& ip : filIps)
         if (ip.compare(remote_host_) == 0)
@@ -75,21 +75,24 @@ int ConfigReader::checkFilter(std::string remote_host_, std::string remote_port_
         if ((ipport.first.compare(remote_host_) == 0) && (ipport.second.compare(remote_port_) == 0))
             return 4;
 
-    for (std::string& domain : filDomains)
-        if (std::regex_match(domain_name, std::regex(domain)))
-            return 5;
+	// check filtered domains
+    for (std::string& domain1 : filDomains)
+		for (std::string& domain2 : domains)
+			if (std::regex_match (domain2, std::regex(domain1)))
+				return 5;
 
     return 0;
 }
 
 
 // check if domain name is in log domain list
-std::string ConfigReader::checkLog(std::string domain_name){
+std::string ConfigReader::checkLog( std::vector<std::string> domains){
 
     std::map<std::string, int>::iterator it;
     for(it = domainSession.begin(); it != domainSession.end(); ++it)
-        if (std::regex_match(domain_name, std::regex(it->first)))
-            return it->first;
+		for (std::string& domain : domains)
+			if (std::regex_match (domain, std::regex(it->first)))
+                return it->first;
             
     return "NO";
 }
