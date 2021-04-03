@@ -1,6 +1,7 @@
 # Socks Proxy Server
 
-Simple proxy server in C++ language using boost::asio library and socks protocol.
+Simple proxy server in C++ language using boost::asio library and socks protocol,
+based on [boost_socks5 project](https://github.com/philave/boost_socks5)
 
 ### Prerequisites
 
